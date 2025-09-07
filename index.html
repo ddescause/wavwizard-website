@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WavWizard - AI Music Separation & Remix Tools</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #000;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="white" opacity="0.1"><path d="M0,50 Q250,0 500,50 T1000,50 L1000,100 L0,100 Z"/></svg>') repeat-x;
+            animation: wave 20s linear infinite;
+        }
+
+        @keyframes wave {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-1000px); }
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero .tagline {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .cta-primary {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 20px 50px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+            animation: fadeInUp 1s ease-out 0.6s both;
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.6);
+        }
+
+        .demo-section {
+            background: #1a1a1a;
+            padding: 80px 0;
+            color: white;
+        }
+
+        .demo-section h2 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 60px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .demo-container {
+            background: #2a2a2a;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .demo-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .demo-card {
+            background: #333;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .demo-card:hover {
+            border-color: #ff6b6b;
+            transform: translateY(-5px);
+        }
+
+        .demo-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #feca57;
+        }
+
+        .demo-card p {
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .play-button {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .play-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .play-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .waveform {
+            width: 100%;
+            height: 100px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .waveform-bars {
+            display: flex;
+            align-items: end;
+            height: 100%;
+            padding: 10px;
+            gap: 2px;
+        }
+
+        .waveform-bar {
+            background: linear-gradient(to top, #ff6b6b, #feca57);
+            border-radius: 1px;
+            transition: all 0.3s ease;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .features {
+            background: #fff;
+            padding: 80px 0;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 60px;
+            color: #333;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .feature h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .feature p {
+            color: #666;
+        }
+
+        .use-cases {
+            background: #f8f9fa;
+            padding: 80px 0;
+        }
+
+        .use-cases h2 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 60px;
+            color: #333;
+        }
+
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .use-case {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .use-case h4 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .pricing {
+            background: #1a1a1a;
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .pricing h2 {
+            font-size: 3rem;
+            margin-bottom: 60px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .pricing-card {
+            background: #2a2a2a;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            margin: 0 auto;
+            border: 2px solid #ff6b6b;
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #feca57;
+            margin-bottom: 10px;
+        }
+
+        .price-period {
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+
+        .cta-signup {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 20px 50px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .cta-signup:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+            
+            .demo-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>WavWizard</h1>
+            <div class="tagline">Separate. Isolate. Remix. Create.</div>
+            <p>AI-powered music separation technology that isolates individual instruments from any song. Remix classics, remaster old recordings, and unleash your creative potential.</p>
+            <a href="#demo" class="cta-primary">Try Live Demo</a>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="demo-section" id="demo">
+        <div class="container">
+            <h2>Hear the Magic in Action</h2>
+            <p style="text-align: center; font-size: 1.2rem; margin-bottom: 40px; color: #ccc;">
+                Experience AI instrument separation with this classic Elvis Presley track
+            </p>
+            
+            <div class="demo-container">
+                <div class="demo-controls">
+                    <div class="demo-card">
+                        <h3>🎵 Original Song</h3>
+                        <p>Elvis Presley - "Can't Help Falling in Love" (Original Mix)</p>
+                        <div class="waveform">
+                            <div class="waveform-bars" id="original-waveform">
+                                <!-- Generated dynamically -->
+                            </div>
+                        </div>
+                        <button class="play-button" onclick="playDemo('original')">Play Original</button>
+                    </div>
+
+                    <div class="demo-card">
+                        <h3>🎤 Vocals Only</h3>
+                        <p>Isolated Elvis vocals - perfect for karaoke or remixing</p>
+                        <div class="waveform">
+                            <div class="waveform-bars" id="vocals-waveform">
+                                <!-- Generated dynamically -->
+                            </div>
+                        </div>
+                        <button class="play-button" onclick="playDemo('vocals')">Play Vocals Only</button>
+                    </div>
+
+                    <div class="demo-card">
+                        <h3>🎸 Instruments Only</h3>
+                        <p>Pure instrumental track - guitar, piano, strings, drums</p>
+                        <div class="waveform">
+                            <div class="waveform-bars" id="instruments-waveform">
+                                <!-- Generated dynamically -->
+                            </div>
+                        </div>
+                        <button class="play-button" onclick="playDemo('instruments')">Play Instruments</button>
+                    </div>
+
+                    <div class="demo-card">
+                        <h3>🥁 Drums Isolated</h3>
+                        <p>Separated drum track - perfect for beat analysis</p>
+                        <div class="waveform">
+                            <div class="waveform-bars" id="drums-waveform">
+                                <!-- Generated dynamically -->
+                            </div>
+                        </div>
+                        <button class="play-button" onclick="playDemo('drums')">Play Drums Only</button>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <p style="color: #ccc; font-style: italic;">
+                        Note: This is a demonstration of our AI technology capabilities. 
+                        Actual separated tracks would be provided via our plugin interface.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2>Unleash Your Creative Power</h2>
+            
+            <div class="feature-grid">
+                <div class="feature">
+                    <div class="feature-icon">🎛️</div>
+                    <h3>Instrument Isolation</h3>
+                    <p>Separate vocals, drums, bass, guitar, piano, and more from any song with unprecedented accuracy</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">🎚️</div>
+                    <h3>Real-time Processing</h3>
+                    <p>Work with separated tracks in real-time within your favorite DAW. No waiting, no rendering delays</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">🎵</div>
+                    <h3>Remix Classics</h3>
+                    <p>Transform legendary songs into new creations. Give classic tracks a modern twist</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">✨</div>
+                    <h3>Remaster & Restore</h3>
+                    <p>Breathe new life into old recordings. Clean up vintage tracks and enhance individual elements</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">🔧</div>
+                    <h3>DAW Integration</h3>
+                    <p>Seamless plugins for Ableton, Logic, Pro Tools, FL Studio, and all major DAWs</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Precision Control</h3>
+                    <p>Fine-tune each separated element with advanced EQ, compression, and effects processing</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases Section -->
+    <section class="use-cases">
+        <div class="container">
+            <h2>Endless Creative Possibilities</h2>
+            
+            <div class="use-case-grid">
+                <div class="use-case">
+                    <h4>🎧 DJs & Remixers</h4>
+                    <p>Create custom edits, extend breakdowns, and build unique transitions</p>
+                </div>
+                
+                <div class="use-case">
+                    <h4>🎼 Music Producers</h4>
+                    <p>Sample isolated instruments, study arrangement techniques, learn from the masters</p>
+                </div>
+                
+                <div class="use-case">
+                    <h4>🎤 Vocalists</h4>
+                    <p>Create perfect karaoke tracks, practice with isolated instrumentals</p>
+                </div>
+                
+                <div class="use-case">
+                    <h4>🎸 Musicians</h4>
+                    <p>Learn individual parts, practice along with separated tracks</p>
+                </div>
+                
+                <div class="use-case">
+                    <h4>🎬 Content Creators</h4>
+                    <p>Create custom background music, isolate elements for video soundtracks</p>
+                </div>
+                
+                <div class="use-case">
+                    <h4>📚 Music Educators</h4>
+                    <p>Teach arrangement, demonstrate individual instrument roles</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing">
+        <div class="container">
+            <h2>Simple, Creator-Friendly Pricing</h2>
+            
+            <div class="pricing-card">
+                <div class="price">$10</div>
+                <div class="price-period">per month</div>
+                <ul style="text-align: left; margin-bottom: 30px; color: #ccc;">
+                    <li>✓ Unlimited song separation</li>
+                    <li>✓ All DAW plugins included</li>
+                    <li>✓ Real-time processing</li>
+                    <li>✓ High-quality audio output</li>
+                    <li>✓ Regular algorithm updates</li>
+                    <li>✓ Community support</li>
+                </ul>
+                <button class="cta-signup" onclick="openModal('signup')">Start Creating Today</button>
+                <p style="color: #888; font-size: 0.9rem;">7-day free trial • Cancel anytime</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('signup')">&times;</span>
+            <h2>Join the WavWizard Beta</h2>
+            <form id="signupForm">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Music Role *</label>
+                    <select name="music_role" required>
+                        <option value="">Select...</option>
+                        <option value="producer">Music Producer</option>
+                        <option value="dj">DJ</option>
+                        <option value="artist">Recording Artist</option>
+                        <option value="composer">Composer</option>
+                        <option value="remixer">Remixer</option>
+                        <option value="educator">Music Educator</option>
+                        <option value="hobbyist">Hobbyist/Amateur</option>
+                        <option value="content_creator">Content Creator</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Primary DAW *</label>
+                    <select name="daw" required>
+                        <option value="">Select...</option>
+                        <option value="ableton">Ableton Live</option>
+                        <option value="logic">Logic Pro</option>
+                        <option value="pro_tools">Pro Tools</option>
+                        <option value="fl_studio">FL Studio</option>
+                        <option value="cubase">Cubase</option>
+                        <option value="studio_one">Studio One</option>
+                        <option value="reaper">Reaper</option>
+                        <option value="reason">Reason</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Experience Level</label>
+                    <select name="experience">
+                        <option value="">Select...</option>
+                        <option value="beginner">Beginner (0-2 years)</option>
+                        <option value="intermediate">Intermediate (2-5 years)</option>
+                        <option value="advanced">Advanced (5-10 years)</option>
+                        <option value="professional">Professional (10+ years)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Would you pay $10/month for this technology? *</label>
+                    <select name="willingness_to_pay" required>
+                        <option value="">Select...</option>
+                        <option value="definitely">Definitely yes</option>
+                        <option value="probably">Probably yes</option>
+                        <option value="maybe">Maybe, depends on quality</option>
+                        <option value="probably_not">Probably not</option>
+                        <option value="definitely_not">Definitely not</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Most exciting feature? *</label>
+                    <select name="feature_interest" required>
+                        <option value="">Select...</option>
+                        <option value="vocal_isolation">Vocal isolation</option>
+                        <option value="instrument_separation">Individual instrument separation</option>
+                        <option value="remix_classics">Remixing classic songs</option>
+                        <option value="remaster_old">Remastering old recordings</option>
+                        <option value="real_time">Real-time processing</option>
+                        <option value="learning">Learning from isolated tracks</option>
+                        <option value="all">All of the above</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>What genres do you work with most?</label>
+                    <input type="text" name="genres" placeholder="e.g., Hip-hop, Electronic, Rock, Pop...">
+                </div>
+                <div class="form-group">
+                    <label>Biggest music production challenge?</label>
+                    <textarea name="challenge" placeholder="What do you struggle with most in your music production workflow?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>When would you start using this? *</label>
+                    <select name="timeline" required>
+                        <option value="">Select...</option>
+                        <option value="immediately">Immediately</option>
+                        <option value="1_month">Within 1 month</option>
+                        <option value="3_months">Within 3 months</option>
+                        <option value="6_months">Within 6 months</option>
+                        <option value="exploring">Just exploring</option>
+                    </select>
+                </div>
+                <input type="hidden" name="market" value="music">
+                <button type="submit" class="submit-btn">Join Beta Waitlist</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Generate waveform visualizations
+        function generateWaveform(containerId) {
+            const container = document.getElementById(containerId);
+            const bars = 50;
+            
+            for (let i = 0; i < bars; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'waveform-bar';
+                bar.style.width = '2px';
+                bar.style.height = Math.random() * 80 + 20 + '%';
+                bar.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(bar);
+            }
+        }
+
+        // Initialize waveforms
+        generateWaveform('original-waveform');
+        generateWaveform('remix-waveform');
+
+        let currentlyPlaying = null;
+
+        function playAudio(type) {
+            // Stop any currently playing audio
+            if (currentlyPlaying) {
+                currentlyPlaying.pause();
+                currentlyPlaying.currentTime = 0;
+                // Reset all button texts
+                document.querySelectorAll('.play-button').forEach(btn => {
+                    if (btn.textContent.includes('⏸')) {
+                        btn.textContent = btn.textContent.replace('⏸ ', '▶ ').replace('Pause', 'Play');
+                    }
+                });
+            }
+
+            const audio = document.getElementById(type + '-audio');
+            const button = document.querySelector(`button[onclick="playAudio('${type}')"]`);
+            
+            if (!audio) {
+                alert(`Demo: Would play ${type} track here. Please ensure "${type === 'original' ? 'Blue Suede Shoes Original extract.wav' : 'Blue Suede Shoes Sencial Remix.wav'}" is uploaded to your server.`);
+                return;
+            }
+
+            // Check if this audio is currently playing
+            if (currentlyPlaying === audio && !audio.paused) {
+                audio.pause();
+                button.textContent = button.textContent.replace('⏸ Pause', '▶ Play');
+                currentlyPlaying = null;
+                return;
+            }
+
+            // Play the audio
+            audio.play().then(() => {
+                currentlyPlaying = audio;
+                button.textContent = button.textContent.replace('Play', 'Pause').replace('▶', '⏸');
+                
+                // Add event listener for when audio ends
+                audio.addEventListener('ended', function() {
+                    button.textContent = button.textContent.replace('⏸ Pause', '▶ Play');
+                    currentlyPlaying = null;
+                });
+
+            }).catch((error) => {
+                console.error('Audio playback failed:', error);
+                alert(`Could not play ${type} audio. Please ensure the file "${type === 'original' ? 'Blue Suede Shoes Original extract.wav' : 'Blue Suede Shoes Sencial Remix.wav'}" is accessible.`);
+            });
+        }
+
+        function showTechDetails() {
+            alert(`WavWizard Technical Process:
+
+🔍 DETECTION PHASE:
+• AI identified 4 main audio sources
+• Vocal track: Elvis Presley (lead)
+• Guitar: Electric guitar (rhythm & lead)
+• Bass: Acoustic upright bass
+• Drums: Full kit with prominent snare
+
+🔀 SEPARATION PHASE:
+• Neural network isolated each instrument
+• Vocal clarity enhanced by 15dB
+• Guitar tracks separated left/right
+• Bass frequencies cleaned and tightened
+• Drum transients sharpened
+
+🎛️ ENHANCEMENT PHASE:
+• Modern EQ curve applied
+• Stereo imaging widened
+• Harmonic saturation added
+• Dynamic range optimized
+• Master limiting for loudness
+
+This process took our AI 2.3 seconds to complete what would take a human engineer hours of manual work.`);
+        }
+
+        function openModal(modalType) {
+            document.getElementById(modalType + 'Modal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalType) {
+            document.getElementById(modalType + 'Modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Form submission - simplified for GitHub Pages
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            // Allow form to submit naturally to Formspree
+            // Show loading state
+            const submitBtn = this.querySelector('.submit-btn');
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+        });
+
+        // Smooth scroll for demo link
+        document.querySelector('a[href="#demo"]').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('demo').scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>
