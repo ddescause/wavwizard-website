@@ -539,7 +539,7 @@
 
                     <div class="demo-card">
                         <h3>🎸 Instruments Only</h3>
-                        <p>Pure instrumental track - guitar, piano, strings, drums</p>
+                        <p>Pure guitar track</p>
                         <div class="waveform">
                             <div class="waveform-bars" id="instruments-waveform">
                                 <!-- Generated dynamically -->
@@ -683,7 +683,7 @@
             <h2>Simple, Creator-Friendly Pricing</h2>
             
             <div class="pricing-card">
-                <div class="price">$10</div>
+                <div class="price">$25</div>
                 <div class="price-period">per month</div>
                 <ul style="text-align: left; margin-bottom: 30px; color: #ccc;">
                     <li>✓ Unlimited song separation</li>
@@ -754,7 +754,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Would you pay $10/month for this technology? *</label>
+                    <label>Would you pay $25/month for this technology? *</label>
                     <select name="willingness_to_pay" required>
                         <option value="">Select...</option>
                         <option value="definitely">Definitely yes</option>
@@ -859,10 +859,18 @@
             console.log('Audio src:', audio.currentSrc || audio.src);
             console.log('Audio duration:', audio.duration);
 
-            // Check if this audio is currently playing
-            if (currentlyPlaying === audio && !audio.paused) {
+            // Check if this is the currently playing audio (either playing or showing stop button)
+            if (currentlyPlaying === audio) {
+                console.log('Stopping audio playback');
                 audio.pause();
-                button.textContent = button.textContent.replace('⏸ Pause', '▶ Play');
+                audio.currentTime = 0;
+                // Reset to original button text based on type
+                if (type === 'original') button.textContent = 'Play Original';
+                else if (type === 'remixed') button.textContent = 'Play Remixed';
+                else if (type === 'vocals') button.textContent = 'Play Vocals Only';
+                else if (type === 'instruments') button.textContent = 'Play Instruments';
+                else if (type === 'bass') button.textContent = 'Play Bass Only';
+                else if (type === 'drums') button.textContent = 'Play Drums Only';
                 currentlyPlaying = null;
                 return;
             }
@@ -875,14 +883,22 @@
             audio.play().then(() => {
                 console.log('Audio started playing successfully');
                 currentlyPlaying = audio;
-                button.textContent = button.textContent.replace('Play', 'Pause').replace('▶', '⏸');
+                button.textContent = '⏹ Stop';
                 
-                // Add event listener for when audio ends
-                audio.addEventListener('ended', function() {
+                // Add event listener for when audio ends (remove any existing listeners first)
+                audio.removeEventListener('ended', handleAudioEnded);
+                function handleAudioEnded() {
                     console.log('Audio playback ended');
-                    button.textContent = button.textContent.replace('⏸ Pause', '▶ Play');
+                    // Reset to original button text based on type
+                    if (type === 'original') button.textContent = 'Play Original';
+                    else if (type === 'remixed') button.textContent = 'Play Remixed';
+                    else if (type === 'vocals') button.textContent = 'Play Vocals Only';
+                    else if (type === 'instruments') button.textContent = 'Play Instruments';
+                    else if (type === 'bass') button.textContent = 'Play Bass Only';
+                    else if (type === 'drums') button.textContent = 'Play Drums Only';
                     currentlyPlaying = null;
-                });
+                }
+                audio.addEventListener('ended', handleAudioEnded);
 
             }).catch((error) => {
                 console.error('Audio playback failed:', error);
