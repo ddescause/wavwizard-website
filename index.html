@@ -494,13 +494,32 @@
                 <div class="demo-controls">
                     <div class="demo-card">
                         <h3>🎵 Original Song</h3>
-                        <p>Elvis Presley - "Can't Help Falling in Love" (Original Mix)</p>
+                        <p>Elvis Presley - "Blue Suede Shoes" (Original Mix)</p>
                         <div class="waveform">
                             <div class="waveform-bars" id="original-waveform">
                                 <!-- Generated dynamically -->
                             </div>
                         </div>
                         <button class="play-button" onclick="playDemo('original')">Play Original</button>
+                        <audio id="original-audio" preload="metadata">
+                            <source src="assets/audio/Blue-Suede-Shoes-Original-extract.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+
+                    <div class="demo-card">
+                        <h3>🎛️ Sencial Remixed</h3>
+                        <p>Elvis Presley - "Blue Suede Shoes" (Sencial Remastered Mix)</p>
+                        <div class="waveform">
+                            <div class="waveform-bars" id="remixed-waveform">
+                                <!-- Generated dynamically -->
+                            </div>
+                        </div>
+                        <button class="play-button" onclick="playDemo('remixed')">Play Remixed</button>
+                        <audio id="remixed-audio" preload="metadata">
+                            <source src="assets/audio/Blue-Suede-Shoes-Sencial-Remix.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
                     </div>
 
                     <div class="demo-card">
@@ -512,6 +531,10 @@
                             </div>
                         </div>
                         <button class="play-button" onclick="playDemo('vocals')">Play Vocals Only</button>
+                        <audio id="vocals-audio" preload="metadata">
+                            <source src="assets/audio/Blue Suede Shoes.Vocals.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
                     </div>
 
                     <div class="demo-card">
@@ -523,6 +546,25 @@
                             </div>
                         </div>
                         <button class="play-button" onclick="playDemo('instruments')">Play Instruments</button>
+                        <audio id="instruments-audio" preload="metadata">
+                            <source src="assets/audio/Blue Suede Shoes.Guitars.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+
+                    <div class="demo-card">
+                        <h3>🎸 Bass Isolated</h3>
+                        <p>Separated bass track - feel the rhythm foundation</p>
+                        <div class="waveform">
+                            <div class="waveform-bars" id="bass-waveform">
+                                <!-- Generated dynamically -->
+                            </div>
+                        </div>
+                        <button class="play-button" onclick="playDemo('bass')">Play Bass Only</button>
+                        <audio id="bass-audio" preload="metadata">
+                            <source src="assets/audio/Blue Suede Shoes.Bass.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
                     </div>
 
                     <div class="demo-card">
@@ -534,6 +576,10 @@
                             </div>
                         </div>
                         <button class="play-button" onclick="playDemo('drums')">Play Drums Only</button>
+                        <audio id="drums-audio" preload="metadata">
+                            <source src="assets/audio/Blue Suede Shoes.Drums.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
                     </div>
                 </div>
 
@@ -774,11 +820,17 @@
 
         // Initialize waveforms
         generateWaveform('original-waveform');
-        generateWaveform('remix-waveform');
+        generateWaveform('remixed-waveform');
+        generateWaveform('vocals-waveform');
+        generateWaveform('instruments-waveform');
+        generateWaveform('bass-waveform');
+        generateWaveform('drums-waveform');
 
         let currentlyPlaying = null;
 
-        function playAudio(type) {
+        function playDemo(type) {
+            console.log('playDemo called with type:', type);
+            
             // Stop any currently playing audio
             if (currentlyPlaying) {
                 currentlyPlaying.pause();
@@ -792,12 +844,20 @@
             }
 
             const audio = document.getElementById(type + '-audio');
-            const button = document.querySelector(`button[onclick="playAudio('${type}')"]`);
+            const button = document.querySelector(`button[onclick="playDemo('${type}')"]`);
+            
+            console.log('Audio element:', audio);
+            console.log('Button element:', button);
             
             if (!audio) {
-                alert(`Demo: Would play ${type} track here. Please ensure "${type === 'original' ? 'Blue Suede Shoes Original extract.wav' : 'Blue Suede Shoes Sencial Remix.wav'}" is uploaded to your server.`);
+                alert(`Audio element not found for ${type}`);
                 return;
             }
+
+            // Check audio readiness
+            console.log('Audio readyState:', audio.readyState);
+            console.log('Audio src:', audio.currentSrc || audio.src);
+            console.log('Audio duration:', audio.duration);
 
             // Check if this audio is currently playing
             if (currentlyPlaying === audio && !audio.paused) {
@@ -807,20 +867,26 @@
                 return;
             }
 
+            // Set volume to ensure it's audible
+            audio.volume = 0.8;
+            
             // Play the audio
+            console.log('Attempting to play audio...');
             audio.play().then(() => {
+                console.log('Audio started playing successfully');
                 currentlyPlaying = audio;
                 button.textContent = button.textContent.replace('Play', 'Pause').replace('▶', '⏸');
                 
                 // Add event listener for when audio ends
                 audio.addEventListener('ended', function() {
+                    console.log('Audio playback ended');
                     button.textContent = button.textContent.replace('⏸ Pause', '▶ Play');
                     currentlyPlaying = null;
                 });
 
             }).catch((error) => {
                 console.error('Audio playback failed:', error);
-                alert(`Could not play ${type} audio. Please ensure the file "${type === 'original' ? 'Blue Suede Shoes Original extract.wav' : 'Blue Suede Shoes Sencial Remix.wav'}" is accessible.`);
+                alert(`Could not play ${type} audio. Error: ${error.message}\nPlease check the browser console for more details.`);
             });
         }
 
